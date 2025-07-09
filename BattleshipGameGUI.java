@@ -8,16 +8,19 @@ public class BattleshipGameGUI extends JFrame {
     private int hits = 0;
     private int turns = 0;
     private final JLabel statusLabel = new JLabel("Hits: 0 | Turns: 0");
+    private final JButton restartButton = new JButton("Restart");
 
     public BattleshipGameGUI() {
         setTitle("Battleship Game");
-        setSize(400, 450);
+        setSize(400, 470); // Slightly increased height
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(10, 10)); // Add some vertical spacing
+        getContentPane().setBackground(Color.WHITE);
 
-        // Top panel to hold grid
-        JPanel gridPanel = new JPanel(new GridLayout(4, 4));
-        Font buttonFont = new Font("Arial", Font.BOLD, 20);
+        // Grid panel
+        JPanel gridPanel = new JPanel(new GridLayout(4, 4, 5, 5));
+        gridPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
+        Font buttonFont = new Font("Arial", Font.BOLD, 22); // Bigger font
 
         for (int row = 0; row < 4; row++) {
             for (int col = 0; col < 4; col++) {
@@ -29,19 +32,29 @@ public class BattleshipGameGUI extends JFrame {
                 int finalCol = col;
 
                 btn.addActionListener(e -> handleClick(finalRow, finalCol));
-
                 gridPanel.add(btn);
             }
         }
 
         add(gridPanel, BorderLayout.CENTER);
 
-        // Bottom panel for status
+        // Bottom panel (status + restart)
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
+
         statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
         statusLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        add(statusLabel, BorderLayout.SOUTH);
+        bottomPanel.add(statusLabel, BorderLayout.NORTH);
 
-        placeRandomShips(); // Randomly place 4 ships
+        restartButton.setFont(new Font("Arial", Font.BOLD, 16));
+        restartButton.setVisible(false);
+        restartButton.addActionListener(e -> restartGame());
+        bottomPanel.add(restartButton, BorderLayout.CENTER);
+
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        placeRandomShips();
+        setLocationRelativeTo(null); // Center the frame
         setVisible(true);
     }
 
@@ -81,6 +94,7 @@ public class BattleshipGameGUI extends JFrame {
             if (hits == 4) {
                 JOptionPane.showMessageDialog(this, "Victory! You sank all ships in " + turns + " turns!");
                 disableAllButtons();
+                restartButton.setVisible(true);
             }
         }
     }
@@ -95,6 +109,27 @@ public class BattleshipGameGUI extends JFrame {
                 buttons[row][col].setEnabled(false);
             }
         }
+    }
+
+    private void restartGame() {
+        // Reset state
+        hits = 0;
+        turns = 0;
+        restartButton.setVisible(false);
+        statusLabel.setText("Hits: 0 | Turns: 0");
+
+        // Reset board
+        for (int row = 0; row < 4; row++) {
+            for (int col = 0; col < 4; col++) {
+                ships[row][col] = false;
+                JButton btn = buttons[row][col];
+                btn.setText("");
+                btn.setEnabled(true);
+                btn.setBackground(null);
+            }
+        }
+
+        placeRandomShips();
     }
 
     public static void main(String[] args) {
